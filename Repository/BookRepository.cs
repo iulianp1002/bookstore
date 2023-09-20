@@ -9,6 +9,11 @@ namespace Bookstore.Repository
     public class BookRepository : IBookRepository
     {
         private readonly IConfiguration _config;
+
+        private const string SPAddBook = "dbo.sp_addBook";
+        private const string SPUpdateBook = "dbo.sp_updateBook";
+        private const string SPGetAllByAuthor = "dbo.sp_getAllByAuthor";
+
         public BookRepository(IConfiguration config)
         {
             _config = config;
@@ -16,13 +21,14 @@ namespace Bookstore.Repository
         public int Create(Book book)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var result = connection.Execute("insert into Books(Title,Description,PictureUrl) Values(@Title,@Description,@PictureUrl", book);
+            var result = connection.Execute(SPAddBook, book);
             return result;
         }
 
         public int Delete(int id)
         {
-            throw new NotImplementedException();
+            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            return connection.Execute("delete from Books where id=@id", id);
         }
 
         public List<Book> GetAllBooks()
@@ -51,7 +57,18 @@ namespace Bookstore.Repository
 
         public int Update(Book book)
         {
-            throw new NotImplementedException();
+            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            var updatedBook = connection.Execute(SPUpdateBook, book);
+
+            return updatedBook;
+        }
+
+        public List<Book> GetAllByAuthor(int authorId)
+        {
+            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            var books = connection.Query<Book>(SPGetAllByAuthor, authorId);
+
+            return books.ToList();
         }
     }
 }
