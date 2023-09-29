@@ -35,7 +35,11 @@ namespace BookstoreAPI.Controllers
             }
            
         }
-
+        /// <summary>
+        /// Get an author
+        /// </summary>
+        /// <param name="id">id of the author</param>
+        /// <returns>the author</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Author>> GetAuthor(int id)
         {
@@ -57,13 +61,17 @@ namespace BookstoreAPI.Controllers
             }
             
         }
-
+        /// <summary>
+        /// Create an Author
+        /// </summary>
+        /// <param name="author">author </param>
+        /// <returns>returns the id of the created author</returns>
         [HttpPost]
         public  async Task<ActionResult<int>> CreateAuthor(Author author)
         {
             try
             {
-                var result = await _authorService.SaveAsync(author);
+                var result = await _authorService.AddAuthorAsync(author);
                 return Ok(result);
             }
             catch(Exception ex)
@@ -74,12 +82,17 @@ namespace BookstoreAPI.Controllers
             
         }
 
+        /// <summary>
+        /// Update the author
+        /// </summary>
+        /// <param name="author"></param>
+        /// <returns>result of the updated operation</returns>
         [HttpPut]
         public async Task<ActionResult<int>> UpdateAuthor(Author author)
         {
             try
             {
-                var result = await _authorService.SaveAsync(author);
+                var result = await _authorService.UpdateAuthorAsync(author);
 
                 return Ok(result);
             }
@@ -90,7 +103,11 @@ namespace BookstoreAPI.Controllers
             }
            
         }
-
+        /// <summary>
+        /// Delete the author
+        /// </summary>
+        /// <param name="id">id of an author</param>
+        /// <returns>result of the delete operation as an integer</returns>
         [HttpDelete("id")]
         public async Task<ActionResult<int>> DeleteAuthor(int id)
         {

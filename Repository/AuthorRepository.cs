@@ -1,5 +1,6 @@
 ﻿using BookstoreAPI.DomainModels;
 using Dapper;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace BookstoreAPI.Repository
@@ -18,7 +19,7 @@ namespace BookstoreAPI.Repository
         public async Task<int> CreateAsync(Author author)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var result = await connection.ExecuteAsync("insert into Authors(Name) Values(@Name)", new {Name = author.Name});
+            var result = await connection.ExecuteAsync("insert into Authors(Name) Values(@Name)", param: new {Name = author.Name}, commandType:CommandType.Text);
             return result;
         }
 
@@ -63,7 +64,7 @@ namespace BookstoreAPI.Repository
         public async Task<int> UpdateAsync(Author author)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var updatedAuthor =await connection.ExecuteAsync("Update Authors Set Name=@Name where id =@id", new { id = author.Id });
+            var updatedAuthor =await connection.ExecuteAsync("Update Authors Set Name=@Name where id =@id",param: new {Name= author.Name, id = author.Id }, commandType: CommandType.Text);
 
             return updatedAuthor;
         }

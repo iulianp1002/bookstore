@@ -107,6 +107,7 @@ namespace BookstoreAPI.Service
             foreach (var book in books)
             {
                 var bookWithAuthorModel = new BookWithAuthorsModel();
+                bookWithAuthorModel.Id = book.Id;
                 bookWithAuthorModel.Title = book.Title;
                 bookWithAuthorModel.Description = book.Description;
                 bookWithAuthorModel.PictureUrl = book.PictureUrl;
@@ -135,10 +136,13 @@ namespace BookstoreAPI.Service
         private string ConcatNames(List<Author> authors)
         {
             var result = new StringBuilder();
-
+            int cnt = 0;
             foreach (var author in authors)
             {
-                result.Append(author.Name + " ");
+                cnt++;
+                if (cnt < authors.Count) { result.Append(author.Name + ", "); }
+                else result.Append(author.Name);
+                
             }
 
             return result.ToString();

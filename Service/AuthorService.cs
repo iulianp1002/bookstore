@@ -55,16 +55,14 @@ namespace BookstoreAPI.Service
             else return author;
         }
 
-        public async Task<int> SaveAsync(Author author)
+        public async Task<int> AddAuthorAsync(Author author)
         {
-            if (author != null && author.Id == 0)
-            {
-                return await _authorRepository.CreateAsync(author);
-            }
-            else
-            {
-                return await _authorRepository.UpdateAsync(author ?? new Author());
-            }
+             return await _authorRepository.CreateAsync(author);
+        }
+
+        public async Task<int> UpdateAuthorAsync(Author author)
+        {
+            return await _authorRepository.UpdateAsync(author ?? new Author());
         }
     }
 }

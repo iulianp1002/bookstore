@@ -8,7 +8,8 @@ namespace BookstoreAPI.Service
         public Task<List<Author>> AuthorListAsync();
         public Task<Author?> FindByIdAsync(int id);
         public Task<Author?> FindByNameAsync(string name);
-        public Task<int> SaveAsync(Author author);
+        public Task<int> AddAuthorAsync(Author author);
+        public Task<int> UpdateAuthorAsync(Author author);
         public Task<int> DeleteAsync(int id);
     }
 }
