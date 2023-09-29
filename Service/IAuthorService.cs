@@ -1,13 +1,14 @@
-﻿using Bookstore.Models;
+﻿using BookstoreAPI.DomainModels;
 
 namespace BookstoreAPI.Service
 {
     public interface IAuthorService
     {
-        List<Author> AuthorListByBook(string bookName);
-        List<Author> AuthorList();
-
-        int Save(Author author);
-        int Delete(int id);
+        public Task<List<Author>> AuthorListByBookAsync(string bookName);
+        public Task<List<Author>> AuthorListAsync();
+        public Task<Author?> FindByIdAsync(int id);
+        public Task<Author?> FindByNameAsync(string name);
+        public Task<int> SaveAsync(Author author);
+        public Task<int> DeleteAsync(int id);
     }
 }

@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using BookstoreAPI.Service;
-using Bookstore.Models;
+using BookstoreAPI.DomainModels;
 
 namespace BookstoreAPI.Controllers
 {
@@ -12,58 +9,105 @@ namespace BookstoreAPI.Controllers
     public class AuthorController : ControllerBase
     {
         private readonly IAuthorService _authorService;
+        private readonly ILogger<AuthorController> _logger;
 
-        public AuthorController(IAuthorService authorService)
+        public AuthorController(IAuthorService authorService, ILogger<AuthorController> logger)
         {
             _authorService = authorService;
+            _logger = logger;
         }
-
-        [HttpGet]
-        public async Task<ActionResult<List<Author>>> GetAllPersons()
+        /// <summary>
+        /// Get the list of all authors
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("AuthorsList")]
+        public async Task<ActionResult<List<Author>>> GetAllAuthors()
         {
-            
-            IEnumerable<Author> authors = await _authorService.get;
-            return Ok(persons);
+            try
+            {
+                var authors = await _authorService.AuthorListAsync();
+                return Ok(authors);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("GetAllAuthors - " + ex.Message, ex);
+                return BadRequest(ex.Message);
+            }
+           
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Person>> GetPerson(int id)
+        public async Task<ActionResult<Author>> GetAuthor(int id)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var person = await connection.QueryFirstAsync<Person>("Select * from Persons where Id=@id", new { id = id });
-            return Ok(person);
+            try
+            {
+                var author = await _authorService.FindByIdAsync(id);
+
+                if (author == null)
+                {
+                    return BadRequest("Author not exist!");
+                }
+
+                return Ok(author);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("GetAuthor - " + ex.Message, ex);
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<Person>>> CreatePerson(Person person)
+        public  async Task<ActionResult<int>> CreateAuthor(Author author)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            await connection.ExecuteAsync("insert into Persons(Name,Email,Phone,Rating) Values(@Name,@Email,@Phone,@Rating", person);
-            return Ok(await GetPersons(connection));
+            try
+            {
+                var result = await _authorService.SaveAsync(author);
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError("CreateAuthor - " + ex.Message, ex);
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpPut]
-        public async Task<ActionResult<List<Person>>> UpdatePerson(Person person)
+        public async Task<ActionResult<int>> UpdateAuthor(Author author)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            await connection.ExecuteAsync("Update Persons Set Name =@Name,Email =@Email,Phone=@Phone,Rating=@Rating where id =@id", person);
-            return Ok(await GetPersons(connection));
+            try
+            {
+                var result = await _authorService.SaveAsync(author);
+
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError("UpdateAuthor - " + ex.Message, ex);
+                return BadRequest(ex.Message);
+            }
+           
         }
 
         [HttpDelete("id")]
-        public async Task<ActionResult<List<Person>>> DeletePerson(int id)
+        public async Task<ActionResult<int>> DeleteAuthor(int id)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            await connection.ExecuteAsync("delete from Persons where id=@id", id);
-            return Ok(await GetPersons(connection));
+            try
+            {
+                var result = await _authorService.DeleteAsync(id);
+
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError("DeleteAuthor - " + ex.Message, ex);
+                return NotFound(ex.Message);
+            }
+            
 
         }
 
-        #region private methods
-        private static async Task<IEnumerable<Person>> GetPersons(SqlConnection connection)
-        {
-            return await connection.QueryAsync<Person>("Select * from Persons");
-        }
-        #endregion
     }
 }

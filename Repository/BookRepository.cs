@@ -1,74 +1,95 @@
-﻿using Bookstore.Models;
+﻿using BookstoreAPI.DomainModels;
+using Core.Common.Extensions;
 using Dapper;
-using System;
+using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 
-namespace Bookstore.Repository
+
+namespace BookstoreAPI.Repository
 {
     public class BookRepository : IBookRepository
     {
         private readonly IConfiguration _config;
 
-        private const string SPAddBook = "dbo.sp_addBook";
-        private const string SPUpdateBook = "dbo.sp_updateBook";
-        private const string SPGetAllByAuthor = "dbo.sp_getAllByAuthor";
-
+        private const string SPAddBookModel = "dbo.sp_AddBookWithId";
         public BookRepository(IConfiguration config)
         {
             _config = config;
         }
-        public int Create(Book book)
+        public async Task<int> CreateAsync(Book book)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var result = connection.Execute(SPAddBook, book);
-            return result;
+
+            var result = await connection.QueryAsync<int>(SPAddBookModel, new
+            {
+                Title = book.Title,
+                Description = book.Description,
+                PictureUrl = book.PictureUrl,
+            }, commandType: CommandType.StoredProcedure);
+
+            return result.FirstOrDefault();
         }
 
-        public int Delete(int id)
+        public async Task<int> DeleteAsync(int id)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            return connection.Execute("delete from Books where id=@id", id);
+            return await connection.ExecuteAsync("Delete from Books where Id=@Id", new { Id = id });
         }
 
-        public List<Book> GetAllBooks()
+        public async Task<List<Book>> GetAllBooksAsync()
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var books = connection.Query<Book>("Select * from Books");
+            var books = await connection.QueryAsync<Book>("Select * from Books");
             
             return books.ToList();
         }
 
-        public Book GetById(int id)
+        public async Task<Book> GetByIdAsync(int id)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var book =  connection.QueryFirst<Book>("Select * from Books where Id=@id", new { id = id });
+            var book = await connection.QueryFirstAsync<Book>("Select * from Books where Id=@Id", new { Id = id });
 
             return book;
         }
 
-        public Book GetByTitle(string nameTitle)
+        public async Task<Book> GetByTitleAsync(string nameTitle)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var book = connection.QueryFirst<Book>("Select * from Books where Title like '%@title%'", new { title = nameTitle });
+            var book = await connection.QueryFirstAsync<Book>("Select * from Books where Title like '%@title%'", new { title = nameTitle });
 
             return book;
         }
 
-        public int Update(Book book)
+        public async Task<int> UpdateAsync(Book book)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var updatedBook = connection.Execute(SPUpdateBook, book);
+            var updatedBook = await connection.ExecuteAsync("Update Books Set Title = @Title, Description = @Description, PictureUrl = @PictureUrl where Id=@Id", new
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Description = book.Description,
+                PictureUrl = book.PictureUrl,
+            }, commandType: CommandType.Text);
 
             return updatedBook;
         }
 
-        public List<Book> GetAllByAuthor(int authorId)
-        {
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var books = connection.Query<Book>(SPGetAllByAuthor, authorId);
+        //public async Task<List<Book>> GetAllByAuthorAsync(int authorId)
+        //{
+        //    using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        //    var books = await connection.QueryAsync<Book>(SPGetAllByAuthor, authorId);
 
-            return books.ToList();
-        }
+        //    return books.ToList();
+        //}
+
+        //public async Task<List<Book>> GetBooksWithAuthorsAsync()
+        //{
+            
+        //    using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        //    var books = await connection.QueryAsync<Book>(SPGetAllBooksWithAuthors);
+
+        //    return books.ToList();
+            
+        //}
     }
 }

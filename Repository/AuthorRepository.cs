@@ -1,59 +1,69 @@
-﻿using Bookstore.Models;
+﻿using BookstoreAPI.DomainModels;
 using Dapper;
 using System.Data.SqlClient;
 
-namespace Bookstore.Repository
+namespace BookstoreAPI.Repository
 {
     public class AuthorRepository : IAuthorRepository
     {
         private readonly IConfiguration _config;
 
+        //private const string SPGetAllByBook = "dbo.sp_getAllAuthorsByBook";
+        
         public AuthorRepository(IConfiguration config) 
         {
             _config = config;
         }
 
-        public int Create(Author author)
+        public async Task<int> CreateAsync(Author author)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var result = connection.Execute("insert into Authors(Name) Values(@Name", author);
+            var result = await connection.ExecuteAsync("insert into Authors(Name) Values(@Name)", new {Name = author.Name});
             return result;
         }
 
-        public int Delete(int id)
+        public async Task<int> DeleteAsync(int id)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            return connection.Execute("delete from Authors where id=@id", id);
+            return await connection.ExecuteAsync("delete from Authors where id=@id", new {id = id});
         }
 
-        public List<Author> GetAllAuthors()
+        public async Task<List<Author>> GetAllAuthorsAsync()
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var authors = connection.Query<Author>("Select * from Authors");
+            var authors = await connection.QueryAsync<Author>("Select * from Authors");
 
             return authors.ToList();
         }
 
-        public Author GetById(int id)
+        //public async Task<List<Author>> GetAllByBookAsync(int bookId)
+        //{
+        //    using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        //    var authors = await connection.QueryAsync<Author>("Select * from Author where Id= @Id", new {bookId);
+
+        //    return authors.ToList();
+        //}
+
+        public async Task<Author> GetByIdAsync(int id)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var author = connection.QueryFirst<Author>("Select * from Authors where Id=@id", new { id = id });
+            var author = await connection.QueryFirstAsync<Author>("Select * from Authors where Id=@id", new { id = id });
 
             return author;
         }
 
-        public Author GetByName(string name)
+        public async Task<Author> GetByNameAsync(string name)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var author = connection.QueryFirst<Author>("Select * from Authors where Name like '%@Name%'", new { Name = name });
+            var author = await connection.QueryFirstAsync<Author>("Select * from Authors where Name like '%@Name%'", new { Name = name });
 
             return author;
         }
 
-        public int Update(Author author)
+        public async Task<int> UpdateAsync(Author author)
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var updatedAuthor = connection.Execute("Update Authors Set Name=@Name where id =@id", author);
+            var updatedAuthor =await connection.ExecuteAsync("Update Authors Set Name=@Name where id =@id", new { id = author.Id });
 
             return updatedAuthor;
         }

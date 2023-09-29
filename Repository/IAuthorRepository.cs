@@ -1,15 +1,16 @@
-﻿using Bookstore.Models;
+﻿using BookstoreAPI.DomainModels;
 
-namespace Bookstore.Repository
+namespace BookstoreAPI.Repository
 {
     public interface IAuthorRepository
     {
-        public List<Author> GetAllAuthors();
-        public Author GetById(int id);
-        public Author GetByName(string name);
+        public Task<List<Author>> GetAllAuthorsAsync();
+        public Task<Author> GetByIdAsync(int id);
+        public Task<Author> GetByNameAsync(string name);
         
-        public int Create(Author author);
-        public int Update(Author book);
-        public int Delete(int id);
+        public Task<int> CreateAsync(Author author);
+        public Task<int> UpdateAsync(Author book);
+        public Task<int> DeleteAsync(int id);
+        
     }
 }

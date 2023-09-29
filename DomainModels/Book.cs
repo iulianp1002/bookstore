@@ -1,4 +1,4 @@
-﻿namespace Bookstore.Models
+﻿namespace BookstoreAPI.DomainModels
 {
     public class Book
     {
@@ -6,6 +6,6 @@
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string PictureUrl { get; set;} = string.Empty;
-        public int BookId { get; set; }
+        
     }
 }

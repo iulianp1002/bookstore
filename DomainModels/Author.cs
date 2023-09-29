@@ -1,4 +1,4 @@
-﻿namespace Bookstore.Models
+﻿namespace BookstoreAPI.DomainModels
 {
     public class Author
     {

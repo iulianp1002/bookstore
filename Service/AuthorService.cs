@@ -1,5 +1,5 @@
-﻿using Bookstore.Models;
-using Bookstore.Repository;
+﻿using BookstoreAPI.DomainModels;
+using BookstoreAPI.Repository;
 
 namespace BookstoreAPI.Service
 {
@@ -7,37 +7,63 @@ namespace BookstoreAPI.Service
     {
         
         private readonly IAuthorRepository _authorRepository;
+        private readonly IBookRepository _bookRepository;
+        private readonly IBookAuthorsRepository _bookAuthorsRepository;
 
-        public AuthorService(IBookRepository bookRepository, IAuthorRepository authorRepository)
+        public AuthorService(IAuthorRepository authorRepository, IBookRepository bookRepository, IBookAuthorsRepository bookAuthorsRepository )
         {
             
             _authorRepository = authorRepository;
+            _bookRepository = bookRepository;
+            _bookAuthorsRepository = bookAuthorsRepository;
         }
 
-        public List<Author> AuthorList()
+        public async Task<List<Author>> AuthorListAsync()
         {
-            return _authorRepository.GetAllAuthors();
+            return await _authorRepository.GetAllAuthorsAsync();
         }
 
-        public List<Author> AuthorListByBook(string bookName)
+        public async Task<List<Author>> AuthorListByBookAsync(string title)
         {
-            return _authorRepository.GetAllAuthors();
+            var book = await _bookRepository.GetByTitleAsync(title);
+            var bookAuthors =  await _bookAuthorsRepository.GetAllByBookIdAsync(book.Id);
+            var authorIds = bookAuthors.Select(x => x.AuthorId).ToList();
+            var authors = await _authorRepository.GetAllAuthorsAsync();
+
+            return  authors.Where(x=>authorIds.Contains(x.Id)).ToList();
+
         }
 
-        public int Delete(int id)
+        public async Task<int> DeleteAsync(int id)
         {
-          return  _authorRepository.Delete(id);
+          return  await _authorRepository.DeleteAsync(id);
         }
 
-        public int Save(Author author)
+        public async Task<Author?> FindByIdAsync(int id)
+        {
+            var author = await _authorRepository.GetByIdAsync(id);
+            
+            if (author == null) return null;
+            else return author;
+        }
+
+        public async Task<Author?> FindByNameAsync(string name)
+        {
+            var author = await _authorRepository.GetByNameAsync(name);
+
+            if (author == null) return null;
+            else return author;
+        }
+
+        public async Task<int> SaveAsync(Author author)
         {
             if (author != null && author.Id == 0)
             {
-                return _authorRepository.Create(author);
+                return await _authorRepository.CreateAsync(author);
             }
             else
             {
-                return _authorRepository.Update(author ?? new Author());
+                return await _authorRepository.UpdateAsync(author ?? new Author());
             }
         }
     }
