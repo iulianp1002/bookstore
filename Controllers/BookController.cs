@@ -9,7 +9,7 @@ namespace BookstoreAPI.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        const string FILE_PATH = @"C:\Samples\";
+        
         private readonly IBookService _bookService;
         private readonly ILogger<BookController> _logger;
 
@@ -138,32 +138,6 @@ namespace BookstoreAPI.Controllers
 
         }
 
-        [HttpPost("Upload")]
-        public IActionResult Post([FromBody] FileUploadModel theFile)
-        {
-            // Create unique file name
-            var filePathName = FILE_PATH +
-                Path.GetFileNameWithoutExtension(theFile.FileName) + "-" +
-                DateTime.Now.ToString().Replace("/", "")
-                .Replace(":", "").Replace(" ", "") +
-                Path.GetExtension(theFile.FileName);
-
-            // Remove file type from base64 encoding, if any
-            if (theFile.FileAsBase64.Contains(","))
-            {
-                theFile.FileAsBase64 = theFile.FileAsBase64
-                  .Substring(theFile.FileAsBase64.IndexOf(",") + 1);
-            }
-
-            // Convert base64 encoded string to binary
-            theFile.FileAsByteArray = Convert.FromBase64String(theFile.FileAsBase64);
-
-            // Write binary file to server path
-            using (var fs = new FileStream(filePathName, FileMode.CreateNew))
-            {
-                fs.Write(theFile.FileAsByteArray, 0, theFile.FileAsByteArray.Length);
-            }
-            return Ok();
-        }
+        
     }
 }

@@ -1,6 +1,8 @@
 using BookstoreAPI.Repository;
 using BookstoreAPI.Service;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Build.Framework;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,10 +25,16 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "BookstorePolicy",
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:4200")
+                          policy.AllowAnyOrigin()
                           .AllowAnyMethod()
                           .AllowAnyHeader();
                       });
+});
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = int.MaxValue;
+    options.MemoryBufferThreshold = int.MaxValue;
 });
 
 //register custom Interfaces and their implementation
@@ -44,8 +52,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
+    RequestPath = new PathString("/Resources")
+});
 
 app.UseCors("BookstorePolicy");
+
 
 app.UseHttpsRedirection();
 
