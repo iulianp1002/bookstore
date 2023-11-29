@@ -12,6 +12,7 @@ namespace BookstoreAPI.Repository
         private readonly IConfiguration _config;
 
         private const string SPAddBookModel = "dbo.sp_AddBookWithId";
+        private const string SPFindByTitle = "dbo.sp_FindByTitle";
         public BookRepository(IConfiguration config)
         {
             _config = config;

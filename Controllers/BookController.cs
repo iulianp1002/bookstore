@@ -83,6 +83,27 @@ namespace BookstoreAPI.Controllers
             
         }
 
+        [HttpGet()]
+        public async Task<ActionResult<Book>> GetBook(string title)
+        {
+            try
+            {
+                var book = await _bookService.FindByTitleAsync(title);
+
+                if (book == null)
+                {
+                    return BadRequest("Book not exist!");
+                }
+
+                return Ok(book);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("GetBook - " + ex.Message, ex);
+                return BadRequest(ex.Message);
+            }
+
+        }
         [HttpPost]
         public async Task<ActionResult<int>> CreateBook([FromBody]AddBookModel model)
         {
